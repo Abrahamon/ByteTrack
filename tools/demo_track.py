@@ -14,6 +14,7 @@ from yolox.utils.visualize import plot_tracking
 from yolox.tracker.byte_tracker import BYTETracker
 from yolox.tracking_utils.timer import Timer
 
+from Full_Butterfly_Detection_Module.Full_Butterfly_Detection_Module import FullButterflyDetector
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
@@ -250,6 +251,7 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
         save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (int(width), int(height))
     )
     tracker = BYTETracker(args, frame_rate=30)
+    detector = FullButterflyDetector()
     timer = Timer()
     frame_id = 0
     results = []
@@ -258,8 +260,25 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
             logger.info('Processing frame {} ({:.2f} fps)'.format(frame_id, 1. / max(1e-5, timer.average_time)))
         ret_val, frame = cap.read()
         if ret_val:
-            outputs, img_info = predictor.inference(frame, timer)
+
+            # My own operation
+            outputs, img_info = detector.detect_img(frame)
+            #print(type(outputs[0]))
+            #print(outputs[0].shape)
+
+            #print(type(img_info))
+            #print(img_info)
+
+
+            #outputs, tmp_img_info = predictor.inference(frame, timer)
+            #print(type(outputs[0]))
+            #print(outputs)
+
+            #print(type(img_info))
+            #print(img_info)
+
             if outputs[0] is not None:
+
                 online_targets = tracker.update(outputs[0], [img_info['height'], img_info['width']], exp.test_size)
                 online_tlwhs = []
                 online_ids = []
